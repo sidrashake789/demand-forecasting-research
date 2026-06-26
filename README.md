@@ -1,4 +1,5 @@
 Hybrid Demand Forecasting Framework
+
 This research project explores the integration of domain-specific contextual data (such as weather patterns and public health crises) into traditional statistical demand forecasting models. By moving from a purely transactional model to a context-aware hybrid framework, this study demonstrates a significant reduction in Mean Absolute Percentage Error (MAPE).
 
 Key Findings
