@@ -9,7 +9,7 @@ Hybrid Framework Performance: 39.37% MAPE (Context-Aware)
 Outcome: A 4.14 percentage point improvement in predictive accuracy.
 
 Project Methodology
-The model utilizes a Random Forest Regressor to analyze 76,000 transaction records. We implemented an epsilon-smoothing technique to ensure mathematical stability and engineered contextual modifiers to account for external environmental volatility.
+The model utilizes a Random Forest Regressor to analyze 76,000 transaction records. I implemented an epsilon-smoothing technique to ensure mathematical stability and engineered contextual modifiers to account for external environmental volatility.
 
 Repository Contents
 train_hybrid.py: The core Python implementation of the hybrid forecasting model.
