@@ -18,7 +18,7 @@ train_hybrid.py: The core Python implementation of the hybrid forecasting model.
 Research_Paper.pdf: The full 5-page research report detailing our methodology, analysis, and future work.
 
 How to Run
-Clone this repository: git clone https://github.com/YOUR_USERNAME/demand-forecasting-research.git
+Clone this repository: git clone https://github.com/sidrashake789/demand-forecasting-research.git
 
 Ensure you have the required libraries installed: pip install pandas scikit-learn
 
