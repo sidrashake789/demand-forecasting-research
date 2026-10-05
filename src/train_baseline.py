@@ -1,43 +1,36 @@
-"""Baseline model: Random Forest on transactional/pricing features only (no context scores)."""
+"""Baseline model: Random Forest using only store sales and pricing info (no weather or health data)."""
 
 from pathlib import Path
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_percentage_error
 
+# Figure out the root directory path so this runs smoothly from anywhere
 ROOT = Path(__file__).resolve().parents[2]
 RAW_DATA = ROOT / "data" / "raw" / "demand_forecasting.csv"
 
-
-# 1. Load data
+# Load up the raw dataset
 df = pd.read_csv(RAW_DATA)
 
-# 2. Prepare features (using numeric columns that correlate with sales)
+# Pick out our baseline features (ignoring the new context scores)
 features = ['Inventory Level', 'Units Ordered', 'Price', 'Discount', 'Competitor Pricing']
 X = df[features].fillna(0)
 y = df['Units Sold']
 
-# 3. Split and Train
+# Split into training and test sets (80/20 split, using random_state for consistency)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Fire up the Random Forest model with 100 trees
 model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
-# 4. Generate Forecasts
+# Generate predictions on the test set and make sure we don't have negative sales
 predictions = model.predict(X_test)
+predictions = np.maximum(predictions, 0.001)
 
-# Sanity Check: Predictions should not be negative
-predictions = np.maximum(predictions, 0.001) 
-# ... (keep your existing model training and prediction lines)
-
-# 4. Generate Forecasts
-predictions = model.predict(X_test)
-
-# 5. Standard MAPE with Epsilon Adjustment
-# We add 1.0 to the denominator to prevent the "division by zero" 
-# or "small denominator" explosion.
-epsilon = 1.0 
+# Calculate modified MAPE with epsilon = 1.0 to handle rows with zero sales gracefully
+epsilon = 1.0
 mape = np.mean(np.abs((y_test - predictions) / (y_test + epsilon))) * 100
 
-print(f"Standard MAPE (adjusted): {mape:.2f}%")
+print(f"Baseline Model MAPE (adjusted): {mape:.2f}%")

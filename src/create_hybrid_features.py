@@ -3,25 +3,25 @@
 from pathlib import Path
 import pandas as pd
 
+# Set up paths relative to the project root directory
 ROOT = Path(__file__).resolve().parents[2]
 RAW_DATA = ROOT / "data" / "raw" / "demand_forecasting.csv"
 HYBRID_DATA = ROOT / "data" / "processed" / "demand_forecasting_hybrid.csv"
 
-
-# 1. Load the original data
+# 1. Load up the raw retail dataset
 df = pd.read_csv(RAW_DATA)
 
-# 2. Define the Mapping (The "LLM-Inspired" Logic)
+# 2. Define our custom mapping logic for external factors
 weather_map = {'Sunny': 1.2, 'Cloudy': 1.0, 'Rainy': 0.9, 'Snowy': 0.8}
 epidemic_map = {0: 1.0, 1: 0.6}
 
-# 3. Create the new "Context Score" columns
+# 3. Map categories into new numerical score columns
 df['Weather_Score'] = df['Weather Condition'].map(weather_map)
 df['Epidemic_Score'] = df['Epidemic'].map(epidemic_map)
 
-# 4. Save the new hybrid dataset
+# 4. Save the new hybrid dataset to the processed data folder
 HYBRID_DATA.parent.mkdir(parents=True, exist_ok=True)
 df.to_csv(HYBRID_DATA, index=False)
 
-print(f"Hybrid dataset created: {HYBRID_DATA.relative_to(ROOT)}")
+print(f"Hybrid dataset created successfully: {HYBRID_DATA.relative_to(ROOT)}")
 print(df[['Weather Condition', 'Weather_Score', 'Epidemic', 'Epidemic_Score']].head())
