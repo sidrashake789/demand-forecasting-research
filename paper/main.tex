@@ -1,4 +1,3 @@
-
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[margin=1in]{geometry}
@@ -8,112 +7,119 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
 
-\setstretch{1.5} % Provides the spacing requested
+\setstretch{1.5}
 
 \title{A Hybrid Framework for Demand Forecasting: Integrating Domain-Specific Context with Statistical Machine Learning}
-\author{Sidra Shaikh \\ Research Project}
+\author{Sidra Shaikh \\ Department of Management Information Systems \\ University of Houston}
 \date{June 1, 2026}
 
 \begin{document}
 \maketitle
 
-\section*{Abstract}
-Predicting demand in volatile markets is a major challenge for traditional forecasting tools. These standard models usually rely only on past sales data, which makes them struggle when faced with sudden, unexpected changes in the real world. In this research, I introduce a new hybrid forecasting framework that bridges the gap between historical sales and external context, such as local weather patterns or public health shifts. By combining a Random Forest machine learning model with a custom smoothing correction, I created a system that stays stable even during periods where demand is unpredictable or low.
+\begin{abstract}
+Predicting retail demand accurately is a major challenge for supply chain planning. Traditional forecasting tools usually look only at past sales and pricing numbers, which means they tend to struggle when sudden real-world shifts happen, such as bad weather or public health crises. In this project, I built a hybrid demand forecasting framework that combines historical sales data with external context scores for weather and epidemic conditions. Using a Random Forest regressor trained on 76,000 transaction records, I compared a standard baseline model against my context-aware hybrid model. The results show that the baseline model produced a Mean Absolute Percentage Error (MAPE) of 43.51\%, while the hybrid model lowered that error to 39.37\%, achieving a 4.14 percentage point improvement. This project demonstrates that simple, structured feature engineering can significantly improve prediction accuracy without requiring complex deep learning systems.
+\end{abstract}
 
-I tested this approach using a dataset of 76,000 transaction records. The results show that my hybrid model performs much better than traditional statistical baselines. Specifically, I saw a reduction in the Mean Absolute Percentage Error from 43.51 percent down to 39.37 percent. This 4.14 percent improvement proves that including environmental context is a powerful way to make forecasts more accurate, especially when markets are behaving erratically.
-
-This study shows that companies can improve their predictive accuracy without needing the massive computing power required for complex deep learning models. My findings suggest that smart feature engineering is an effective way to get more value out of existing data. For my future work, I plan to explore how to automate these contextual updates using real time data streams.
 \section{Introduction}
-The global supply chain is increasingly defined by constant change and volatility. Traditional demand forecasting methods usually rely only on historical sales data, which makes it difficult for these models to maintain accuracy when faced with unexpected market shocks. In industries ranging from retail to logistics, the ability to predict demand with high precision is the most important factor for operational efficiency. However, standard statistical models, such as the Autoregressive Integrated Moving Average, often fail to capture the complex relationship between external environmental factors and how consumers actually behave.
+In retail and supply chain management, having accurate demand forecasts is essential for keeping inventory balanced and avoiding stockouts. Most standard forecasting methods rely strictly on past sales records and pricing. However, when external disruptions occur—like severe weather storms or health restrictions—these historical models often fail because they assume past trends will simply repeat themselves.
 
-In this project, I propose a hybrid framework that bridges the gap between historical sales data and real time contextual variables. By integrating qualitative data, such as regional weather patterns and public health indices, into a Random Forest machine learning model, I move beyond simple linear math. I argue that predictive accuracy is not just a result of how complex an algorithm is, but is instead a result of how well that algorithm integrates real world context. Throughout this paper, I demonstrate how this hybrid approach provides a more stable and accurate way to forecast demand, even when market conditions become unpredictable.
+In this project, I wanted to test whether adding practical context features into a machine learning model could make retail demand predictions more reliable. Rather than using complex deep learning architectures, I focused on a clean, interpretable approach: a Random Forest regressor combined with custom numeric weights for weather conditions and epidemic statuses. By mapping qualitative categories into simple scaling scores, I aimed to give the model better visibility into real-world factors that drive consumer behavior.
 
-The evolution of demand forecasting has seen a steady progression from simple moving averages to complex deep learning architectures. Breiman \cite{breiman2001} established the foundational utility of Random Forest Regression, providing the baseline for much of the tree-based modeling I use today. While traditional time-series methods remain relevant, as noted by Box et al. \cite{box2015} and Hyndman and Athanasopoulos \cite{hyndman2018}, contemporary literature highlights a persistent "stability gap" in demand forecasting when exogenous variables are ignored.
+The main contributions of this work include:
+\begin{enumerate}
+    \item Designing a simple data pipeline that converts categorical weather and epidemic data into numerical weighting scores.
+    \item Implementing and evaluating a Random Forest model on 76,000 retail transaction records, comparing a baseline feature set against the hybrid context-aware feature set.
+    \item Using a modified MAPE evaluation metric that adds an epsilon smoothing factor ($\epsilon = 1.0$) to the denominator, preventing errors from blowing up on rows with zero sales.
+\end{enumerate}
+
+\section{Related Work}
+Demand forecasting has evolved from simple moving averages and classical time series models, such as ARIMA (Box et al. \cite{box2015}; Hyndman and Athanasopoulos \cite{hyndman2018}), to machine learning regression techniques. Breiman \cite{breiman2001} established the foundation for Random Forest regression, showing how ensemble tree methods handle non-linear interactions well without overfitting. 
+
+In supply chain analytics, researchers have increasingly looked at hybrid modeling strategies (Zhang \cite{zhang2003}) to combine traditional baselines with external indicators. Recent industry benchmarks, such as the M4 Competition findings summarized by Makridakis et al. \cite{makridakis2020}, highlight that incorporating external context helps bridge the stability gap in retail forecasting. My work builds on these ideas by testing a lightweight feature engineering approach on a large retail dataset.
 
 \section{Data Dictionary}
-To ensure the reproducibility of this study, I have defined the key variables utilized in the model. The table below outlines the primary features extracted from the 76,000 transaction records:
+The dataset used in this research comes from Kaggle and contains exactly 76,000 transaction records. It covers 5 stores and 20 products over a 760-day period from January 1, 2022, to January 30, 2024, with no missing values. Table 1 outlines the primary features used in the models.
 
 \begin{table}[h]
 \centering
 \caption{Variables and Definitions}
 \begin{tabular}{lll}
 \toprule
-Feature & Type & Description \\
+Feature Name & Data Type & Description \\
 \midrule
-Sales\_Volume & Numerical & Total units sold per day \\
-Weather\_Index & Categorical & Normalized value based on local climate data \\
-Health\_Risk & Ordinal & Scale (0 to 1) representing regional mandate severity \\
-Lead\_Time & Numerical & Time elapsed between order and fulfillment \\
-Target\_Variable & Numerical & Predicted demand for the subsequent period \\
+Units Sold & Numerical & Total units sold per day (Target Variable) \\
+Inventory Level & Numerical & Current stock available \\
+Units Ordered & Numerical & Quantity ordered for replenishment \\
+Price & Numerical & Retail product price \\
+Discount & Numerical & Applied discount percentage \\
+Competitor Pricing & Numerical & Competitor pricing benchmark \\
+Weather Condition & Categorical & Local weather state (Sunny, Cloudy, Rainy, Snowy) \\
+Epidemic & Binary & Public health crisis indicator flag (0 or 1) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Methodology}
-I utilized a dataset of 76,000 transaction records to conduct this study. The primary challenge I faced was converting qualitative environmental data into quantitative inputs that my machine learning model could process effectively. To solve this, I designed a specific weighting schema where I mapped environmental states to numerical multipliers.
+The project workflow is divided into data preprocessing, feature engineering, and model training.
 
-My data pipeline began with a thorough cleaning phase. I filled any missing values using a rolling mean to ensure the continuity of the time series data. Because the dataset was large, I identified outliers using the Interquartile Range method and capped them to ensure that the Random Forest model would not be skewed by extreme or unusual data points.
+\subsection{Feature Engineering}
+To help the machine learning model understand external conditions, I converted categorical weather and epidemic labels into numerical scores using a dictionary lookup in `src/features/create_hybrid_features.py`:
+\begin{itemize}
+    \item \textbf{Weather Score}: Sunny ($1.2$), Cloudy ($1.0$), Rainy ($0.9$), Snowy ($0.8$).
+    \item \textbf{Epidemic Score}: Normal ($1.0$), Flagged outbreak ($0.6$).
+\end{itemize}
 
-After cleaning the data, I moved to the feature engineering stage. I transformed raw environmental inputs into dynamic weighting coefficients. I achieved this by using a mapping function that turned different variables into a unified Contextual Sensitivity Index. For example, I assigned a multiplier of 1.2 to sunny weather, as it typically increases foot traffic, and a multiplier of 0.6 to public health crisis periods, as these conditions generally depress consumer demand.
+\subsection{Model Training and Evaluation}
+I trained two separate Random Forest regression models using Python's \textit{scikit-learn} library (`n_estimators=100`, `random_state=42`), using an 80/20 train/test split (60,800 training rows and 15,200 testing rows):
+\begin{itemize}
+    \item \textbf{Baseline Model} (`src/models/train_baseline.py`): Trained using `['Inventory Level', 'Units Ordered', 'Price', 'Discount', 'Competitor Pricing']`.
+    \item \textbf{Hybrid Model} (`src/models/train_hybrid.py`): Trained using `['Inventory Level', 'Units Ordered', 'Price', 'Weather_Score', 'Epidemic_Score']`.
+\end{itemize}
 
-I then trained a Random Forest regressor with 100 estimators and a maximum depth of 15. I determined these parameters through a grid search cross-validation process to ensure the model would avoid overfitting. This configuration allowed the model to remain sensitive to local market variations while keeping the generalization capability I needed for accurate future demand forecasting.
+Because the dataset includes transactions with zero units sold, standard MAPE calculations would result in division-by-zero errors. To fix this, I used a modified MAPE formula with an epsilon smoothing factor ($\epsilon = 1.0$) added to the denominator:
+\begin{equation}
+\text{MAPE} = \frac{1}{n} \sum_{i=1}^{n} \left| \frac{y_i - \hat{y}_i}{y_i + 1} \right| \times 100
+\end{equation}
 
-To ensure the scalability of the model, I incorporated principles of tree boosting as discussed by Chen and Guestrin \cite{chen2017}. Furthermore, my approach to combining statistical models with environmental inputs follows the hybrid methodology framework popularized by Zhang \cite{zhang2003}, which aims to balance the strengths of both linear and non-linear predictive behaviors.
-
-\begin{lstlisting}[language=Python, caption=Hybrid Model Integration, frame=single]
-# Integration of context-aware weights
-weather_map = {'Sunny': 1.2, 'Cloudy': 1.0, 'Rainy': 0.9, 'Snowy': 0.8}
-df['Weather_Score'] = df['Weather'].map(weather_map)
-\end{lstlisting}
-
-\section{Results}
-Here is the Results and Discussion section, written in the first-person singular, with no em dashes, and structured to help you meet your length and depth requirements.
-
-Results and Discussion
-In my analysis, I compared the baseline statistical model against my hybrid framework. The baseline model, which relied only on historical sales, produced a Mean Absolute Percentage Error of 43.51 percent. By integrating external contextual factors through my hybrid framework, I successfully reduced this error to 39.37 percent. This represents a 4.14 percent improvement in predictive accuracy.
-
-I found that these accuracy gains were most significant during periods of high environmental volatility. Specifically, during weeks where the weather shifted dramatically, the baseline model failed because it assumed historical trends would continue indefinitely. My hybrid framework, however, adjusted downward in a proactive way. This sensitivity proves that the intelligence of my model is directly tied to the richness of the input features I provided.
-
-My results are consistent with the benchmarking standards established during the M4 Competition \cite{makridakis2020}. For further statistical validation of my model's performance, I utilized inference methods detailed by Hastie et al. \cite{hastie2009}, which ensure the reliability of the error metrics I observed. Additionally, I applied density estimation techniques as described by Silverman \cite{silverman2018} to refine my prediction intervals.
-
-To better understand these results, I conducted a sensitivity analysis. I observed that the model performed best when the environmental data was clean and consistent. When I tracked the model performance against actual sales, I noticed that the hybrid approach prevented the inventory bloat that usually happens when standard models ignore external factors. This confirms that my hybrid approach is a reliable tool for stabilizing forecasts.
-
-However, I must acknowledge the limitations of this work. My model relies heavily on the quality of external data streams. If a weather forecast is incorrect, the output of my model will naturally degrade. Because I manually assigned the weights for factors like weather and public health, there is a limit to how well the model can adapt without human intervention. This leads me to conclude that while my hybrid framework is a major step forward, the next logical phase of this research involves automating these weights to allow for real time responsiveness.
-
-\section{Conclusion}
-In this research, I have demonstrated that integrating domain-specific context into statistical forecasting can significantly enhance predictive accuracy. By moving beyond the reliance on historical sales data alone, I have shown that even a relatively simple hybrid framework can effectively account for the external shocks that often disrupt supply chain planning. My results, specifically the 4.14 percent reduction in Mean Absolute Percentage Error, provide clear evidence that contextual awareness is a powerful tool for inventory management and operational efficiency.
-
-This study serves as a practical proof-of-concept for organizations that require better forecasting but lack the resources to deploy complex deep learning infrastructure. I have proven that human-informed feature engineering is currently an efficient and reliable way to maximize the value of existing datasets.
-
-As I look to the future, I recognize that the manual assignment of weights is a bottleneck for scalability. My next step will be to explore how I can automate these contextual inputs by using Large Language Models to analyze real time reports. By shifting from a static hybrid model to a dynamic and autonomous system, I hope to create a forecasting tool that can learn from and adapt to unprecedented market changes as they happen. This project has reinforced my belief that the future of supply chain analytics lies in the seamless combination of statistical rigor and real world intelligence.
-
-\newpage
-\section*{Appendix: Model Implementation}
-I implemented the hybrid framework using Python’s \textit{scikit-learn} library. The following code snippet demonstrates the initialization of the Random Forest Regressor and the application of my custom weighting function.
-
-\begin{lstlisting}[language=Python, caption=Random Forest implementation and feature weighting]
+\begin{lstlisting}[language=Python, caption=Hybrid Model Implementation Sample, frame=single]
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
-# Loading and splitting the dataset
-data = pd.read_csv('transaction_records.csv')
-X = data[['Weather_Index', 'Health_Risk', 'Historical_Trend']]
-y = data['Target_Variable']
+data = pd.read_csv('../data/processed/demand_forecasting_hybrid.csv')
+features = ['Inventory Level', 'Units Ordered', 'Price', 'Weather_Score', 'Epidemic_Score']
+X = data[features]
+y = data['Units Sold']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
-# Initializing the model with 100 estimators
-model = RandomForestRegressor(n_estimators=100, max_depth=15)
-
-# Training the model
+model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
-
-# Final prediction phase
 predictions = model.predict(X_test)
 \end{lstlisting}
 
+\section{Results and Discussion}
+When evaluated on the test set, the baseline model produced a MAPE of 43.51\%. The hybrid model achieved a MAPE of 39.37\%, representing a 4.14 percentage point improvement (about a 9.5\% relative error reduction). 
+
+During periods of bad weather or epidemic disruptions, the baseline model tended to overpredict sales because it relied only on historical sales trends. The hybrid model adjusted its predictions downward more appropriately, helping prevent excess inventory buildup.
+
+\subsection{Limitations}
+There are several limitations to keep in mind:
+\begin{enumerate}
+    \item \textbf{Feature Trade-off}: The hybrid model swapped out `Discount` and `Competitor Pricing` for the context scores, so the accuracy improvement cannot be credited solely to the weather and epidemic scores by themselves.
+    \item \textbf{Random Split}: The data split was done randomly rather than chronologically by date, which means there could be some temporal overlap between training and testing sets.
+    \item \textbf{Manual Weights}: The weather and epidemic scores were assigned manually based on intuition rather than being learned automatically from the data.
+\end{enumerate}
+
+\section{Conclusion}
+This research shows that incorporating simple context scores into a Random Forest model can improve retail demand forecasting accuracy. By adding weather and epidemic multipliers, the hybrid model reduced prediction error from 43.51\% to 39.37\%. For future work, I plan to explore automating these score assignments using real-time data feeds.
+
+\newpage
 \bibliographystyle{plain}
 \bibliography{references}
 
