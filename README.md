@@ -20,14 +20,6 @@ Model Comparison: Evaluated Linear Regression against Random Forest and tuned Gr
 
 Performance Gains: Reduced Mean Absolute Percentage Error (MAPE) from 18.4% down to 5.8%.
 
- # Repository Structure
-
-├── data/                 # Sample transactional datasets
-├── notebooks/            # Exploratory data analysis & model training
-├── src/                  # Modular Python scripts for preprocessing & evaluation
-├── requirements.txt      # Project dependencies
-└── README.md             # Project documentation
-
 
 # How to Run
 
