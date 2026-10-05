@@ -64,7 +64,8 @@ Scripts can be run from any folder.
 ├── experiments/              early exploratory scripts, kept for reference
 ├── scripts/                  data checks and dataset statistics
 ├── paper/                    LaTeX paper, references, summary-PDF script
-├── requirements.txt
+├── requirements
+│   ├── requirements/
 └── README.md
 ```
 
