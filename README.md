@@ -3,7 +3,7 @@
 This repository contains the code and data pipeline for my undergraduate MIS project exploring how external context factors (like weather conditions and health outbreaks) affect retail demand forecasting. 
 
 ## Project Overview
-Most standard retail forecasting models rely strictly on past sales history and pricing data. When sudden external disruptions occur—such as severe weather or public health crises—these historical models often struggle because they assume past sales patterns will simply repeat. 
+Most standard retail forecasting models rely strictly on past sales history and pricing data. When sudden external disruptions occur,such as severe weather or public health crises, these historical models often struggle because they assume past sales patterns will simply repeat. 
 
 In this project, I built a hybrid demand forecasting pipeline using a Random Forest regressor on 76,000 retail transaction records. By mapping categorical weather and epidemic indicators into custom numerical scoring weights, the hybrid model achieves a lower prediction error compared to a standard baseline model.
 
