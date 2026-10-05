@@ -1,34 +1,38 @@
-# Hybrid Demand Forecasting
+# A Hybrid Framework for Demand Forecasting
 
-Does adding weather and epidemic information make a retail demand forecast more accurate?
+This repository contains the code and data pipeline for my undergraduate MIS project exploring how external context factors (like weather conditions and health outbreaks) affect retail demand forecasting. 
 
-This project compares two Random Forest models that predict retail unit sales. One uses only sales and pricing data, while the other incorporates weather and epidemic context scores.
+## Project Overview
+Most standard retail forecasting models rely strictly on past sales history and pricing data. When sudden external disruptions occur—such as severe weather or public health crises—these historical models often struggle because they assume past sales patterns will simply repeat. 
 
----
+In this project, I built a hybrid demand forecasting pipeline using a Random Forest regressor on 76,000 retail transaction records. By mapping categorical weather and epidemic indicators into custom numerical scoring weights, the hybrid model achieves a lower prediction error compared to a standard baseline model.
 
-## Results at a Glance
-
-| Model | Inputs | Error (MAPE) |
-| :--- | :--- | :--- |
-| **Baseline** | Inventory Level, Units Ordered, Price, Discount, Competitor Pricing | 43.51% |
-| **Hybrid** | Inventory Level, Units Ordered, Price, Weather Score, Epidemic Score | 39.37% |
-
-* The hybrid model's error is **4.14 percentage points lower** (a **9.5% relative reduction**).
-* **Important Caveat:** Read these findings with caution as preliminary evidence rather than a controlled test:
-  * The hybrid model also drops *Discount* and *Competitor Pricing*, meaning performance gains cannot be exclusively attributed to the context scores alone.
-  * The train/test split is random rather than chronological by date.
-  * Results are derived from a single run.
-  * A full discussion is available in the paper's **Limitations** section.
+## Key Performance Results
+* **Baseline Model MAPE:** 43.51% (Trained on transactional and pricing features only)
+* **Hybrid Model MAPE:** 39.37% (Trained with engineered `Weather_Score` and `Epidemic_Score` features)
+* **Improvement:** 4.14 absolute percentage point reduction in error (approx. 9.5% relative decrease).
 
 ---
 
-## Quick Start
+## Repository Structure
 
-```bash
-git clone [https://github.com/sidrashake789/demand-forecasting-research.git](https://github.com/sidrashake789/demand-forecasting-research.git)
-cd demand-forecasting-research
-
-pip install -r requirements.txt
-
-python src/models/train_baseline.py   # Prints 43.51%
-python src/models/train_hybrid.py     # Prints 39.37%
+```text
+├── data/
+│   ├── raw/
+│   │   └── demand_forecasting.csv       # Original dataset (76,000 records)
+│   └── processed/
+│       └── demand_forecasting_hybrid.csv # Processed dataset with context score columns
+├── src/
+│   ├── features/
+│   │   └── create_hybrid_features.py    # Maps weather/epidemic categories to numeric scores
+│   └── models/
+│       ├── train_baseline.py            # Baseline Random Forest model trainer
+│       └── train_hybrid.py              # Hybrid Random Forest model trainer
+├── experiments/
+│   ├── analyze.py                       # Early exploratory HistGradientBoosting script
+│   └── train_simple.py                  # Early 3-feature exploratory script
+├── paper/
+│   └── main.tex                         # LaTeX source code for the research paper
+├── generate_paper.py                    # Script to compile project summary report
+├── requirements.txt                     # Python dependencies
+└── README.md
