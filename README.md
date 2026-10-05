@@ -1,4 +1,4 @@
-# 🛍️ A Hybrid Framework for Demand Forecasting
+# A Hybrid Framework for Demand Forecasting
 
 ## Executive Summary
 Predicting retail demand accurately is a major challenge for supply chain planning. Traditional forecasting models rely strictly on historical sales transactions and pricing, often failing during unexpected real-world disruptions such as severe weather storms or public health crises[cite: 19].
